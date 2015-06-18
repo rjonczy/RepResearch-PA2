@@ -1,0 +1,70 @@
+---
+title: "Analysis of Storm Data across United States"
+author: "Robert Jonczy"
+date: "18.06.2015"
+output: html_document
+---
+
+## Synopsis
+
+This analysis focuses on analysis the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database to answer questions what events are most harmful with respect to population health and what events have the greatest economic consequences.
+
+## Data processing
+
+### Downloading and loading data
+
+Storm Data is downloaded from [here](http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+
+Downloading data if it was not found in local folder and loading in if not found in memory.
+
+```{r, echo=TRUE}
+
+    if(!file.exists('./stormdata.csv.bz2')) {
+        download.file("http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = 'stormdata.csv.bz2')
+    }
+        
+    if(!exists('storm_data')) {
+        storm_data <- read.csv(bzfile('./stormdata.csv.bz2'))
+    }
+
+```
+
+### Data preparation
+
+```{r, echo=TRUE}
+library(knitr)
+library(dplyr)
+storm_data <- select(storm_data, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG)
+storm_data <- mutate(storm_data, TOTALDMG = PROPDMG + CROPDMG)
+storm_data <- mutate(storm_data, TOTALFATINJ = FATALITIES + INJURIES)
+ 
+fatinj <- aggregate(storm_data$TOTALFATINJ, list(storm_data$EVTYPE), sum)
+names(fatinj) <- c('EVTYPE','SUMINJURIES')
+fatinj <- arrange(fatinj, desc(SUMINJURIES))
+
+cost <- aggregate(storm_data$TOTALDMG, list(storm_data$EVTYPE), sum)
+names(cost) <- c('EVTYPE','SUMDAMAGES')
+cost <- arrange(cost, desc(SUMDAMAGES))
+
+```
+
+## Results
+
+I was trying to answer 2 questions with these analysis:
+
+- Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+- Across the United States, which types of events have the greatest economic consequences?
+
+### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+
+Most harmful events with respect to population health (amount of Injuries and Fatalities) are: **TORNADOS**
+
+```{r, echo=TRUE}
+summary(storm_data$TOTALFATINJ)
+
+kable(head(fatinj, 10))
+```
+
+### Across the United States, which types of events have the greatest economic consequences?
+
+
