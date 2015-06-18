@@ -7,7 +7,7 @@ output: html_document
 
 ## Synopsis
 
-This analysis focuses on analysis the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database to answer questions what events are most harmful with respect to population health and what events have the greatest economic consequences.
+This analysis focuses on analysis the U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database to find out what events are most harmful with respect to population health and what events have the greatest economic consequences.
 
 ## Data processing
 
@@ -31,9 +31,11 @@ Downloading data if it was not found in local folder and loading in if not found
 
 ### Data preparation
 
+I am loading additional libraries like: [dplyr](http://cran.r-project.org/web/packages/dplyr/index.html) and [knitr](http://cran.r-project.org/web/packages/knitr/index.html) and suppress warning messages.
+
 ```{r, echo=TRUE}
-library(knitr)
-library(dplyr)
+suppressWarnings(library(knitr))
+suppressWarnings(library(dplyr))
 storm_data <- select(storm_data, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG)
 storm_data <- mutate(storm_data, TOTALDMG = PROPDMG + CROPDMG)
 storm_data <- mutate(storm_data, TOTALFATINJ = FATALITIES + INJURIES)
@@ -55,16 +57,31 @@ I was trying to answer 2 questions with these analysis:
 - Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
 - Across the United States, which types of events have the greatest economic consequences?
 
-### Across the United States, which types of events (as indicated in the EVTYPE variable) are most harmful with respect to population health?
+### Top 10 types of events most harmful with respect to population health
 
 Most harmful events with respect to population health (amount of Injuries and Fatalities) are: **TORNADOS**
 
 ```{r, echo=TRUE}
+library(ggplot2)
 summary(storm_data$TOTALFATINJ)
 
 kable(head(fatinj, 10))
+
+fatinj <- head(fatinj, 10)
 ```
 
-### Across the United States, which types of events have the greatest economic consequences?
+Above data has been visualise on histogram:
+
+```{r, echo=TRUE}
+ggplot(fatinj, aes(x = reorder(EVTYPE, SUMINJURIES), y = SUMINJURIES, fill = "red")) +
+    geom_bar(stat="identity") +
+    geom_text(aes(label = SUMINJURIES, size=0.5)) +
+    coord_flip() +
+    ggtitle("Injuries + Fatalities") +
+    xlab("Event type") +
+    theme(legend.position = "none")
+```
+
+### Top 10 types of events with greatest economic consequences
 
 
