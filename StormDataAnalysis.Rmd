@@ -15,17 +15,17 @@ This analysis focuses on analysis the U.S. National Oceanic and Atmospheric Admi
 
 Storm Data is downloaded from [here](http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
 
-Downloading data if it was not found in local folder and loading in if not found in memory.
+Downloading data if it was not found in local folder and loading into dataframe `storm_data` if it was not found in memory.
 
 ```{r, echo=TRUE}
 
-    if(!file.exists('./stormdata.csv.bz2')) {
-        download.file("http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = 'stormdata.csv.bz2')
-    }
+if(!file.exists('./stormdata.csv.bz2')) {
+    download.file("http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = 'stormdata.csv.bz2')
+}
         
-    if(!exists('storm_data')) {
-        storm_data <- read.csv(bzfile('./stormdata.csv.bz2'))
-    }
+if(!exists('storm_data')) {
+    storm_data <- read.csv(bzfile('./stormdata.csv.bz2'))
+}
 
 ```
 
@@ -34,15 +34,15 @@ Downloading data if it was not found in local folder and loading in if not found
 I am loading additional libraries like: [dplyr](http://cran.r-project.org/web/packages/dplyr/index.html) and [knitr](http://cran.r-project.org/web/packages/knitr/index.html) and suppress warning messages.
 
 ```{r, echo=TRUE}
-suppressWarnings(library(knitr))
-suppressWarnings(library(dplyr))
+suppressWarnings(suppressMessages(library(knitr)))
+suppressWarnings(suppressMessages(library(dplyr)))
 storm_data <- select(storm_data, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG)
 storm_data <- mutate(storm_data, TOTALDMG = PROPDMG + CROPDMG)
 storm_data <- mutate(storm_data, TOTALFATINJ = FATALITIES + INJURIES)
  
 fatinj <- aggregate(storm_data$TOTALFATINJ, list(storm_data$EVTYPE), sum)
-names(fatinj) <- c('EVTYPE','SUMINJURIES')
-fatinj <- arrange(fatinj, desc(SUMINJURIES))
+names(fatinj) <- c('EVTYPE','SUMFATINJ')
+fatinj <- arrange(fatinj, desc(SUMFATINJ))
 
 cost <- aggregate(storm_data$TOTALDMG, list(storm_data$EVTYPE), sum)
 names(cost) <- c('EVTYPE','SUMDAMAGES')
@@ -59,8 +59,6 @@ I was trying to answer 2 questions with these analysis:
 
 ### Top 10 types of events most harmful with respect to population health
 
-Most harmful events with respect to population health (amount of Injuries and Fatalities) are: **TORNADOS**
-
 ```{r, echo=TRUE}
 library(ggplot2)
 summary(storm_data$TOTALFATINJ)
@@ -73,15 +71,24 @@ fatinj <- head(fatinj, 10)
 Above data has been visualise on histogram:
 
 ```{r, echo=TRUE}
-ggplot(fatinj, aes(x = reorder(EVTYPE, SUMINJURIES), y = SUMINJURIES, fill = "red")) +
+ggplot(fatinj, aes(x = reorder(EVTYPE, SUMFATINJ), y = SUMFATINJ, fill = "red")) +
     geom_bar(stat="identity") +
-    geom_text(aes(label = SUMINJURIES, size=0.5)) +
+    geom_text(aes(label = SUMFATINJ, size=0.5)) +
     coord_flip() +
     ggtitle("Injuries + Fatalities") +
     xlab("Event type") +
     theme(legend.position = "none")
 ```
 
+Conclusion: Most harmful events with respect to population health (amount of Injuries and Fatalities) are: **TORNADOS**
+
 ### Top 10 types of events with greatest economic consequences
 
+```{r, echo=TRUE}
+summary(storm_data$TOTALDMG)
 
+kable(head(cost, 10))
+
+```
+
+Conclusion: Greatest economic consequences in United States cause: **TORNADOS**

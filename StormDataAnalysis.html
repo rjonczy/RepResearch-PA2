@@ -69,37 +69,28 @@ img {
 
 <div id="synopsis" class="section level2">
 <h2>Synopsis</h2>
-<p>This analysis focuses on analysis the U.S. National Oceanic and Atmospheric Administration’s (NOAA) storm database to answer questions what events are most harmful with respect to population health and what events have the greatest economic consequences.</p>
+<p>This analysis focuses on analysis the U.S. National Oceanic and Atmospheric Administration’s (NOAA) storm database to find out what events are most harmful with respect to population health and what events have the greatest economic consequences.</p>
 </div>
 <div id="data-processing" class="section level2">
 <h2>Data processing</h2>
 <div id="downloading-and-loading-data" class="section level3">
 <h3>Downloading and loading data</h3>
 <p>Storm Data is downloaded from <a href="http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2">here</a></p>
-<p>Downloading data if it was not found in local folder and loading in if not found in memory.</p>
-<pre class="r"><code>    if(!file.exists('./stormdata.csv.bz2')) {
-        download.file(&quot;http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2&quot;, destfile = 'stormdata.csv.bz2')
-    }
+<p>Downloading data if it was not found in local folder and loading into dataframe <code>storm_data</code> if it was not found in memory.</p>
+<pre class="r"><code>if(!file.exists('./stormdata.csv.bz2')) {
+    download.file(&quot;http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2&quot;, destfile = 'stormdata.csv.bz2')
+}
         
-    if(!exists('storm_data')) {
-        storm_data &lt;- read.csv(bzfile('./stormdata.csv.bz2'))
-    }</code></pre>
+if(!exists('storm_data')) {
+    storm_data &lt;- read.csv(bzfile('./stormdata.csv.bz2'))
+}</code></pre>
 </div>
 <div id="data-preparation" class="section level3">
 <h3>Data preparation</h3>
-<pre class="r"><code>library(knitr)
-library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>storm_data &lt;- select(storm_data, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG)
+<p>I am loading additional libraries like: <a href="http://cran.r-project.org/web/packages/dplyr/index.html">dplyr</a> and <a href="http://cran.r-project.org/web/packages/knitr/index.html">knitr</a> and suppress warning messages.</p>
+<pre class="r"><code>suppressWarnings(suppressMessages(library(knitr)))
+suppressWarnings(suppressMessages(library(dplyr)))
+storm_data &lt;- select(storm_data, EVTYPE, FATALITIES, INJURIES, PROPDMG, CROPDMG)
 storm_data &lt;- mutate(storm_data, TOTALDMG = PROPDMG + CROPDMG)
 storm_data &lt;- mutate(storm_data, TOTALFATINJ = FATALITIES + INJURIES)
  
@@ -190,6 +181,61 @@ summary(storm_data$TOTALFATINJ)</code></pre>
 </div>
 <div id="top-10-types-of-events-with-greatest-economic-consequences" class="section level3">
 <h3>Top 10 types of events with greatest economic consequences</h3>
+<pre class="r"><code>summary(storm_data$TOTALDMG)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00    0.00    0.00   13.59    1.00 5000.00</code></pre>
+<pre class="r"><code>kable(head(cost, 10))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">EVTYPE</th>
+<th align="right">SUMDAMAGES</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">TORNADO</td>
+<td align="right">3312276.7</td>
+</tr>
+<tr class="even">
+<td align="left">FLASH FLOOD</td>
+<td align="right">1599325.1</td>
+</tr>
+<tr class="odd">
+<td align="left">TSTM WIND</td>
+<td align="right">1445168.2</td>
+</tr>
+<tr class="even">
+<td align="left">HAIL</td>
+<td align="right">1268289.7</td>
+</tr>
+<tr class="odd">
+<td align="left">FLOOD</td>
+<td align="right">1067976.4</td>
+</tr>
+<tr class="even">
+<td align="left">THUNDERSTORM WIND</td>
+<td align="right">943635.6</td>
+</tr>
+<tr class="odd">
+<td align="left">LIGHTNING</td>
+<td align="right">606932.4</td>
+</tr>
+<tr class="even">
+<td align="left">THUNDERSTORM WINDS</td>
+<td align="right">464978.1</td>
+</tr>
+<tr class="odd">
+<td align="left">HIGH WIND</td>
+<td align="right">342014.8</td>
+</tr>
+<tr class="even">
+<td align="left">WINTER STORM</td>
+<td align="right">134699.6</td>
+</tr>
+</tbody>
+</table>
+<p>Greatest economic consequences in United States cause: <strong>TORNADOS</strong></p>
 </div>
 </div>
 
